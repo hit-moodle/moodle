@@ -3053,6 +3053,9 @@ function fullname($user, $override=false) {
         return '';
     }
 
+    if ($user->firstname == $user->lastname)
+        return $user->firstname;
+
     if (!$override) {
         if (!empty($CFG->forcefirstname)) {
             $user->firstname = $CFG->forcefirstname;
@@ -3067,10 +3070,10 @@ function fullname($user, $override=false) {
     }
 
     if (!isset($CFG->fullnamedisplay) or $CFG->fullnamedisplay === 'firstname lastname') {
-        return $user->firstname .' '. $user->lastname;
+        return $user->firstname == $user->lastname ? $user->firstname : $user->firstname .' '. $user->lastname;
 
     } else if ($CFG->fullnamedisplay == 'lastname firstname') {
-        return $user->lastname .' '. $user->firstname;
+        return $user->firstname == $user->lastname ? $user->firstname : $user->lastname .' '. $user->firstname;
 
     } else if ($CFG->fullnamedisplay == 'firstname') {
         if ($override) {
