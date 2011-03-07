@@ -3066,8 +3066,9 @@ function fullname($user, $override=false) {
         $CFG->fullnamedisplay = $SESSION->fullnamedisplay;
     }
 
-    if ($user->firstname == $user->lastname and strlen($user->firstname) > 3)
+    if ($user->firstname == $user->lastname and strlen($user->firstname) > 3) {
         return $user->firstname;
+    }
 
     if (!isset($CFG->fullnamedisplay) or $CFG->fullnamedisplay === 'firstname lastname') {
         return $user->firstname .' '. $user->lastname;
