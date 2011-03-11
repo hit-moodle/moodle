@@ -95,7 +95,18 @@ class zip_packer extends file_packer {
         }
 
         $ziparch = new zip_archive();
-        if (!$ziparch->open($archivefile, file_archive::OVERWRITE)) {
+
+        // Check user's system, if it's Windows, convert filename encoding to GBK
+        // Exclude mbz file
+        // For more : https://github.com/hit-moodle/moodle/issues#issue/3
+        if(strtolower(end(explode(".", $archivefile))) != 'mbz') {
+            $encoding = strpos($_SERVER['HTTP_USER_AGENT'], 'Windows') ? 'gbk' : 'utf-8';
+
+        } else {
+            $encoding = 'utf-8';
+        }
+
+        if (!$ziparch->open($archivefile, file_archive::OVERWRITE, $encoding)) {
             return false;
         }
 
