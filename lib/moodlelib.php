@@ -9149,10 +9149,10 @@ WHERE m.useridto = :userid AND p.name='popup'";
             //try to display the small version of the message
             $smallmessage = null;
             if (!empty($message_users->smallmessage)) {
-                //display the first 200 chars of the message in the popup
+                //display the first 300 chars of the message in the popup
                 $smallmessage = null;
-                if (strlen($message_users->smallmessage>200)) {
-                    $smallmessage = substr($message_users->smallmessage,0,200).'...';
+                if (strlen($message_users->smallmessage>300)) {
+                    $smallmessage = substr($message_users->smallmessage,0,300).'...';
                 } else {
                     $smallmessage = $message_users->smallmessage;
                 }
