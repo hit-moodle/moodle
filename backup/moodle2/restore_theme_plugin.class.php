@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -15,26 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+defined('MOODLE_INTERNAL') || die();
+
 /**
- * This file was replaced by index.php in Moodle 2.0
- * It now simply redirects to index.php
+ * Restore for course plugin: theme.
  *
- * @author Luis Rodrigues and Martin Dougiamas
+ * @package    moodlecore
+ * @subpackage backup-moodle2
+ * @copyright 2011 The Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @package message
  */
-
-    require('../config.php');
-    require('lib.php');
-
-    //the same URL params as in 1.9
-    $userid     = required_param('id', PARAM_INT);
-    $noframesjs = optional_param('noframesjs', 0, PARAM_BOOL);
-
-    $params = array('user2'=>$userid);
-    if (!empty($noframesjs)) {
-        $params['noframesjs'] = $noframesjs;
-    }
-    $url = new moodle_url('/message/index.php', $params);
-    redirect($url);
-?>
+abstract class restore_theme_plugin extends restore_plugin {
+    // Use default parent behaviour
+}
