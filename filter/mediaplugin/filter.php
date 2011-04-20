@@ -102,6 +102,20 @@ class filter_mediaplugin extends moodle_text_filter {
             $newtext = preg_replace_callback($search, 'filter_mediaplugin_vimeo_callback', $newtext);
         }
 
+        // Youku
+
+        if (!empty($CFG->filter_mediaplugin_enable_youku)) {
+            $search = '/<a\s[^>]*href="http:\/\/v\.youku\.com\/v_show\/id_([a-zA-Z0-9]*)\.html(#[^"]*)?"[^>]*>([^>]*)<\/a>/is';
+            $newtext = preg_replace_callback($search, 'filter_mediaplugin_youku_callback', $newtext);
+        }
+
+        // 163 
+
+        if (!empty($CFG->filter_mediaplugin_enable_163)) {
+            $search = '/<a\s[^>]*href="http:\/\/v\.163\.com\/(movie|video)\/[0-9]{4}\/([a-zA-Z0-9]\/){3}([a-zA-Z_0-9]+)\.html(#[^"]*)?"[^>]*>([^>]*)<\/a>/is';
+            $newtext = preg_replace_callback($search, 'filter_mediaplugin_163_callback', $newtext);
+        }
+        
 
         // HTML 5 audio and video tags are the future! If only if vendors decided to use just one audio and video format...
 
@@ -763,6 +777,61 @@ function filter_mediaplugin_vimeo_callback($link) {
 <iframe title="$info" src="http://player.vimeo.com/video/$videoid" width="$width" height="$height" frameborder="0"></iframe>
 </span>
 OET;
+
+    return $output;
+}
+
+/**
+ * Change links to Youku into embedded Youku videos
+ *
+ * @param  $link
+ * @return string
+ */
+function filter_mediaplugin_youku_callback($link) {
+    global $CFG;
+
+    if (filter_mediaplugin_ignore($link[0])) {
+        return $link[0];
+    }
+
+    $videoid = $link[1];
+    $info    = s(strip_tags($link[3]));
+
+    $output = <<<OET
+<span class="mediaplugin mediaplugin_youku">
+<embed title="$info" src="http://player.youku.com/player.php/sid/$videoid/v.swf" quality="high" width="480" height="400" align="middle" allowScriptAccess="sameDomain" type="application/x-shockwave-flash"></embed>
+</span>
+OET;
+
+    return $output;
+}
+
+/**
+ * Change links to 163 into embedded 163 videos
+ *
+ * @param  $link
+ * @return string
+ */
+function filter_mediaplugin_163_callback($link) {
+    global $CFG;
+
+    if (filter_mediaplugin_ignore($link[0])) {
+        return $link[0];
+    }
+
+    $type = $link[1];
+    $videoid = $link[3];
+    $info    = s(strip_tags($link[5]));
+
+    if ($type == 'video') {
+        $output = <<<OET
+<embed title="$info" src="http://img1.cache.netease.com/flvplayer081128/~false~0085_$videoid~.swf" quality="high" width="480" height="400" align="middle" allowScriptAccess="sameDomain" allowfullscreen="true" type="application/x-shockwave-flash"></embed>
+OET;
+    } else { // $type == 'movie'
+        $output = <<<OET
+<object width="640" height="360"><param name="movie" value="http://swf.ws.126.net/movieplayer/-0-2_$videoid-.swf"></param><param name="allowScriptAccess" value="always"></param><param name="wmode" value="transparent"></param><embed title="$info" src="http://swf.ws.126.net/movieplayer/-0-2_$videoid-.swf" type="application/x-shockwave-flash" width="640" height="360" allowFullScreen="true" wmode="transparent" allowScriptAccess="always"></embed></object>
+OET;
+    }
 
     return $output;
 }

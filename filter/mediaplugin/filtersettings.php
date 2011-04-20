@@ -30,6 +30,8 @@ if ($ADMIN->fulltree) {
     // External services
     $settings->add(new admin_setting_configcheckbox('filter_mediaplugin_enable_youtube', get_string('siteyoutube','filter_mediaplugin'), get_string('siteyoutube_help','filter_mediaplugin'), 1));
     $settings->add(new admin_setting_configcheckbox('filter_mediaplugin_enable_vimeo', get_string('sitevimeo','filter_mediaplugin'), get_string('sitevimeo_help','filter_mediaplugin'), 0));
+    $settings->add(new admin_setting_configcheckbox('filter_mediaplugin_enable_youku', get_string('siteyouku','filter_mediaplugin'), get_string('siteyouku_help','filter_mediaplugin'), 1));
+    $settings->add(new admin_setting_configcheckbox('filter_mediaplugin_enable_163', get_string('site163','filter_mediaplugin'), get_string('site163_help','filter_mediaplugin'), 1));
 
     // these require flash
     $settings->add(new admin_setting_configcheckbox('filter_mediaplugin_enable_mp3', get_string('mp3audio','filter_mediaplugin'), get_string('mp3audio_help','filter_mediaplugin'), 1));

@@ -49,4 +49,8 @@ $string['sitevimeo'] = 'Vimeo';
 $string['sitevimeo_help'] = 'Vimeo video sharing site.';
 $string['siteyoutube'] = 'YouTube';
 $string['siteyoutube_help'] = 'YouTube video sharing site, video and playlist links supported.';
+$string['siteyouku'] = 'Youku';
+$string['siteyouku_help'] = 'Youku video sharing site.';
+$string['site163'] = '163';
+$string['site163_help'] = '163 video sharing site.';
 
