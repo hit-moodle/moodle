@@ -367,6 +367,7 @@ class assignment_uploadsingle extends assignment_base {
         $groupmode = groups_get_activity_groupmode($this->cm);
         $groupid = 0;   // All users
         $groupname = '';
+	$grades_feedback_string = NULL;	//init
         if ($groupmode) {
             $groupid = groups_get_activity_group($this->cm, true);
             $groupname = groups_get_group_name($groupid).'-';
@@ -377,24 +378,64 @@ class assignment_uploadsingle extends assignment_base {
             if ((groups_is_member($groupid,$a_userid)or !$groupmode or !$groupid)) {
                 $a_assignid = $submission->assignment; //get name of this assignment for use in the file names.
                 $a_user = $DB->get_record("user", array("id"=>$a_userid),'id,username,firstname,lastname'); //get user firstname/lastname
+		//查找当前得分及feedback
+		$grades_feedback = array();
+		$grades_feedback = $DB->get_record("grade_grades", array("userid"=>$a_userid, "itemid"=>$this->cm->id), 'userid, rawgrade, rawgrademax, feedback, usermodified, timemodified');//得到用户的成绩和反馈
+		$teac_user = $DB->get_record("user", array("id"=>$grades_feedback->usermodified), 'firstname, lastname');
+		//判断时是否有成绩，只有在有成绩的情况下输出_username_feedback.html
+		if($grades_feedback->rawgrade){
+			//将成绩和反馈存入字符串
+			$feedback_homework = get_string('course');	
+			$feedback_teacher = get_string('teachers');	
+			$feedback_student = get_string('username');
+			$feedback_grades = get_string('grades');
+			$feedback_feedback = get_string('feedback');
+//			$feedback_time = get_string('modified');
+			$grades_feedback_string = $feedback_homework.':'.$this->assignment->name.'</p>'.$feedback_teacher.':'.fullname($teac_user).'</p>'.$feedback_student.':'.fullname($a_user).'</p>'.$feedback_grades.':'.$grades_feedback->rawgrade.'/'.$grades_feedback->rawgrademax.'</p>'.$feedback_feedback.':'."$grades_feedback->feedback".'</p>';			
+			//字符串将要以html形式保存，加上html标识
+			$grades_feedback_string = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf8"></head>'.$grades_feedback_string.'</html>';
+			//建立文件，将grade&feedback存入grades_feed.html
+			$fs = get_file_storage();
+			// 参数可能有些问题~~~~~~~~~~~~~~~
+			$fileinfo = array(
+					'contextid' => $this->context->id, // ID of context			
+					'component' => 'mod_assignment',     // usually = table name
+					'filearea' => 'submission',     // usually = table name
+					'itemid' => 0,               // usually = ID of row in table
+					'filepath' => '/',           // any path beginning and ending in /
+					 'filename' => '_'.fullname($a_user).'_'.'feedback.html'
+					);
+			$file_feedback_old = $fs->get_file($fileinfo["contextid"], $fileinfo["component"], $fileinfo["filearea"], $fileinfo["itemid"], $fileinfo["filepath"], $fileinfo["filename"]);
+			//如果文件已经存在，则删除重建
+			if($file_feedback_old){
+				$file_feedback_old->delete();
+			}
+			//建立文件
+			$fs->create_file_from_string($fileinfo, $grades_feedback_string);
+			$file_feedback = $fs->get_file($fileinfo["contextid"], $fileinfo["component"], $fileinfo["filearea"], $fileinfo["itemid"], $fileinfo["filepath"], $fileinfo["filename"]);
+			$fileinfoname = fullname($a_user)."/".$fileinfo["filename"];	//将文件放入文件夹中
+			$filesforzipping[$fileinfoname] = $file_feedback;
+		}
 
                 $files = $fs->get_area_files($this->context->id, 'mod_assignment', 'submission', $submission->id, "timemodified", false);
                 foreach ($files as $file) {
-                    //get files new name.
-                    $fileext = strstr($file->get_filename(), '.');
-                    $fileoriginal = str_replace($fileext, '', $file->get_filename());
-                    $fileforzipname =  clean_filename(fullname($a_user) . "_" . $fileoriginal."_".$a_userid.$fileext);
-                    //save file name to array for zipping.
-                    $filesforzipping[$fileforzipname] = $file;
+			//get files new name.
+			$fileext = strstr($file->get_filename(), '.');
+			$fileoriginal = str_replace($fileext, '', $file->get_filename());
+			$fileforzipname =  clean_filename(fullname($a_user) . "_" . $fileoriginal."_".$a_userid.$fileext);
+			//save file name to array for zipping.
+			$fileforzipname1 = fullname($a_user)."/$fileforzipname";	//将文件放入文件夹中
+			$filesforzipping[$fileforzipname1] = $file;
                 }
             }
         } // End of foreach
-        if ($zipfile = assignment_pack_files($filesforzipping)) {
-            send_temp_file($zipfile, $filename); //send file and delete after sending.
-        }
-    }
-}
+	        if ($zipfile = assignment_pack_files($filesforzipping)) {
+	            send_temp_file($zipfile, $filename); //send file and delete after sending.
 
+	        }
+	    }
+	}
+	
 class mod_assignment_uploadsingle_response_form extends moodleform {
     function definition() {
         $mform = $this->_form;
