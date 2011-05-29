@@ -45,14 +45,40 @@ require_login($course->id, false, $cm);
 require_capability('mod/assignment:grade', get_context_instance(CONTEXT_MODULE, $cm->id));
 
 $PAGE->requires->js('/mod/assignment/assignment.js');
+$PAGE->requires->js('/mod/assignment/download.js');
 
 /// Load up the required assignment code
 require($CFG->dirroot.'/mod/assignment/type/'.$assignment->assignmenttype.'/assignment.class.php');
 $assignmentclass = 'assignment_'.$assignment->assignmenttype;
 $assignmentinstance = new $assignmentclass($cm->id, $assignment, $cm, $course);
 
-if($download == "zip") {
-    $assignmentinstance->download_submissions();
+    $go = false;
+    $get_feedback = false;
+    $into_folder = false;
+    
+	  if(isset($_POST['submit_1'])){
+   	     $into_folder = false;
+   	     $go = true;   
+
+   	  }
+  	  else if(isset($_POST['submit_2'])){
+   	     $into_folder = true;
+   	     $go = true;
+
+   	 }
+   	 if(isset($_POST['feedback']) && $_POST['feedback'] == 'feedback'){
+   	     $get_feedback = true;
+    	     $go = true;
+
+   	 }
+   	 else{
+    	     $get_feedback = false;
+  	  }
+
+if($download == "zip" && $go == true) {
+    $assignmentinstance->download_submissions($get_feedback, $into_folder);
+    $download = NULL;
+    $assignmentinstance->submissions($mode);
 } else {
     $assignmentinstance->submissions($mode);   // Display or process the submissions
 }
