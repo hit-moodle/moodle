@@ -1454,7 +1454,21 @@ class assignment_base {
             }
             if ($hassubmission && ($this->assignment->assignmenttype=='upload' || $this->assignment->assignmenttype=='online' || $this->assignment->assignmenttype=='uploadsingle')) { //TODO: this is an ugly hack, where is the plugin spirit? (skodak)
                 echo html_writer::start_tag('div', array('class' => 'mod-assignment-download-link'));
-                echo html_writer::link(new moodle_url('/mod/assignment/submissions.php', array('id' => $this->cm->id, 'download' => 'zip')), get_string('downloadall', 'assignment'));
+//                echo html_writer::link(new moodle_url('/mod/assignment/submissions.php', array('id' => $this->cm->id, 'download' => 'zip')), get_string('downloadall', 'assignment'));
+                echo html_writer::tag('div', get_string('downloadall', 'assignment'), array('id' => 'download_ass'));
+                $download = 'zip';
+                echo html_writer::start_tag('div', array('style'=>'display:none', 'id'=>'download_form'));
+                echo html_writer::start_tag('form', array('method'=>'post'));
+                echo html_writer::tag('input', get_string('with','feedback'), array('class'=>'download_button', 'type'=>'radio', 'name'=>'feedback', 'value'=>'feedback'));
+                echo html_writer::tag('input', get_string('without', 'feedback'), array('class'=>'download_button_2', 'type'=>'radio', 'name'=>'feedback', 'value'=>'no_feedback'));
+                echo html_writer::empty_tag('input', array('class'=>'download_submit', 'type'=>'submit', 'name'=>'submit_1', 'value'=>'into_one_directory'));
+                echo html_writer::empty_tag('input', array('class'=>'download_submit_2', 'type'=>'submit', 'name'=>'submit_2', 'value'=>'each_into_one_directory'));
+                if($download == 'zip')
+                    echo html_writer::empty_tag('input', array('name'=>'download', 'style'=>'display:none', 'value'=>'zip'));
+                else
+                    echo html_writer::empty_tag('input', array('name'=>'download', 'style'=>'display:none', 'value'=>'none'));
+                echo html_writer::end_tag('form');
+                echo html_writer::end_tag('div');
                 echo html_writer::end_tag('div');
             }
             $table->print_html();  /// Print the whole table
