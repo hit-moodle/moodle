@@ -27,3 +27,5 @@ CVS
 /.cache
 /mod/hotquestion/
 /plagiarism/crot/
+/local/onlinejudge2
+/mod/assignment/type/onlinejudge
