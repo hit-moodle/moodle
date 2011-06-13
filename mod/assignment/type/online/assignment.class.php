@@ -388,8 +388,7 @@ class assignment_online extends assignment_base {
     public function download_submissions($get_feedback = false, $into_folder = false) {
         global $CFG, $DB;
         
-        require($CFG->dirroot.'/mod/assignment/type/download_adjust/download_adjust.class.php');
-        $download_adjust = new download_adjust($this->cm->id, $this->assignment, $this->cm, $this->course);
+        $download_modify = new assignment_base($this->cm->id, $this->assignment, $this->cm, $this->course);
         
         raise_memory_limit(MEMORY_EXTRA);
 
@@ -419,7 +418,7 @@ class assignment_online extends assignment_base {
                 $a_user = $DB->get_record("user", array("id"=>$a_userid),'id,username,firstname,lastname'); //get user firstname/lastname
                 
                 if($get_feedback == true){
-		    $return_fileinfo = $download_adjust->adjust($a_user, $a_userid, $into_folder);
+		    $return_fileinfo = $download_modify->download_modify($a_user, $a_userid, $into_folder);
 		    $fileinfoname = $return_fileinfo[0];
 		    $file_feedback = $return_fileinfo[1];
 		    if(empty($return_fileinfo[1]) == false)

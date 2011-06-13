@@ -357,8 +357,7 @@ class assignment_uploadsingle extends assignment_base {
         global $CFG,$DB;
         require_once($CFG->libdir.'/filelib.php');
 
-        require($CFG->dirroot.'/mod/assignment/type/download_adjust/download_adjust.class.php');
-	$download_adjust = new download_adjust($this->cm->id, $this->assignment, $this->cm, $this->course);
+        $download_modify = new assignment_base($this->cm->id, $this->assignment, $this->cm, $this->course);
 	
         $submissions = $this->get_submissions('','');
         if (empty($submissions)) {
@@ -383,7 +382,7 @@ class assignment_uploadsingle extends assignment_base {
 
                 //judge if we want the feedback
 		if($get_feedback == true){
-		    $return_fileinfo = $download_adjust->adjust($a_user, $a_userid, $into_folder);
+		    $return_fileinfo = $download_modify->download_modify($a_user, $a_userid, $into_folder);
 		    $fileinfoname = $return_fileinfo[0];
 		    $file_feedback = $return_fileinfo[1];
 		    if(empty($return_fileinfo[1]) == false)
