@@ -385,9 +385,11 @@ class assignment_online extends assignment_base {
     /**
      * creates a zip of all assignment submissions and sends a zip to the browser
      */
-    public function download_submissions() {
+    public function download_submissions($get_feedback = false, $into_folder = false) {
         global $CFG, $DB;
-
+        
+        $download_modify = new assignment_base($this->cm->id, $this->assignment, $this->cm, $this->course);
+        
         raise_memory_limit(MEMORY_EXTRA);
 
         $submissions = $this->get_submissions('','');
@@ -414,10 +416,26 @@ class assignment_online extends assignment_base {
             if ((groups_is_member($groupid,$a_userid)or !$groupmode or !$groupid)) {
                 $a_assignid = $submission->assignment; //get name of this assignment for use in the file names.
                 $a_user = $DB->get_record("user", array("id"=>$a_userid),'id,username,firstname,lastname'); //get user firstname/lastname
+                
+                if($get_feedback == true){
+		    $return_fileinfo = $download_modify->download_modify($a_user, $a_userid, $into_folder);
+		    $fileinfoname = $return_fileinfo[0];
+		    $file_feedback = $return_fileinfo[1];
+		    if(empty($return_fileinfo[1]) == false)
+		        $filesforzipping[$fileinfoname] = $file_feedback;
+		}
+		
                 $submissioncontent = "<html><body>". format_text($submission->data1, $submission->data2). "</body></html>";      //fetched from database
                 //get file name.html
                 $fileforzipname =  clean_filename(fullname($a_user) . "_" .$a_userid.$filextn);
-                $filesforzipping[$fileforzipname] = array($submissioncontent);
+                
+                if($into_folder == true)
+                    $fileforzipname1 = fullname($a_user)."/$fileforzipname";	//put the file into a folder
+                else
+                    $fileforzipname1 = $fileforzipname;
+                $filesforzipping[$fileforzipname1] = $file;
+                
+                $filesforzipping[$fileforzipname1] = array($submissioncontent);
             }
         }      //end of foreach
 

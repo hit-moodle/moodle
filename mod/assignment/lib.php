@@ -143,6 +143,61 @@ class assignment_base {
     }
 
     /**
+     *Modify the download option of the homework.
+     *
+     *Now can download some extra information about user.
+     */
+    function download_modify($a_user, $a_userid, $into_folder = FALSE){
+        global $CFG,$DB;
+        require_once($CFG->libdir.'/filelib.php');
+	$grades_feedback_string = NULL;	//init
+        //find out the grades and feedback
+        $grades_feedback = array();
+        $itemid = $this->cm->id + 2;		//plus 2 to get the real itemid which is no null
+        $grades_feedback = $DB->get_record("grade_grades", array("userid"=>$a_userid, "itemid"=>$itemid), 'userid, rawgrade, rawgrademax, feedback, usermodified, timemodified');//get the grades and feedback 
+        $teac_user = $DB->get_record("user", array("id"=>$grades_feedback->usermodified), 'firstname, lastname');
+        //if the grade exists, create _username_feedback.html
+        if($grades_feedback->rawgrade){
+        //store the information into strings
+            $feedback_homework = get_string('course');	
+            $feedback_teacher = get_string('teachers');	
+            $feedback_student = get_string('username');
+            $feedback_grades = get_string('grades');
+            $feedback_feedback = get_string('feedback');
+            $feedback_time = get_string('modified');
+	    $feedback_time_value = date("Y-m-d H:i:s", $grades_feedback->timemodified);
+            $grades_feedback_string = $feedback_homework.':'.$this->assignment->name.'</p>'.$feedback_teacher.':'.fullname($teac_user).'</p>'.$feedback_student.':'.fullname($a_user).'</p>'.$feedback_grades.':'.$grades_feedback->rawgrade.'/'.$grades_feedback->rawgrademax.'</p>'.$feedback_feedback.':'."$grades_feedback->feedback".'</p>'."$feedback_time".':'."$feedback_time_value".'</p>';
+            //the string should be stored in html
+            $grades_feedback_string = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf8"></head>'.$grades_feedback_string.'</html>';
+            //create the file, put grade&feedback into _grades_feedback.html
+            $fs = get_file_storage();
+            $fileinfo = array(
+                               'contextid' => $this->context->id, // ID of context			
+                               'component' => 'mod_assignment',     // usually = table name
+                               'filearea' => 'submission',     // usually = table name
+                               'itemid' => 0,               // usually = ID of row in table
+                               'filepath' => '/',           // any path beginning and ending in /
+                               'filename' => '_'.fullname($a_user).'_'.'feedback.html'
+                              );
+            $file_feedback_old = $fs->get_file($fileinfo["contextid"], $fileinfo["component"], $fileinfo["filearea"], $fileinfo["itemid"], $fileinfo["filepath"], $fileinfo["filename"]);
+            //if the file exists, delete it
+            if($file_feedback_old){
+                $file_feedback_old->delete();
+            }
+            //create the new file
+            $fs->create_file_from_string($fileinfo, $grades_feedback_string);
+            $file_feedback = $fs->get_file($fileinfo["contextid"], $fileinfo["component"], $fileinfo["filearea"], $fileinfo["itemid"], $fileinfo["filepath"], $fileinfo["filename"]);
+            if($into_folder == TRUE)
+                $fileinfoname = fullname($a_user)."/".$fileinfo["filename"];	//put the file into a folder
+            else
+                $fileinfoname = $fileinfo["filename"];
+        }
+	$return_fileinfo[0] = $fileinfoname;
+	$return_fileinfo[1] = $file_feedback;
+	return $return_fileinfo;
+    }
+
+    /**
      * Display the assignment, used by view.php
      *
      * This in turn calls the methods producing individual parts of the page
@@ -1452,7 +1507,21 @@ class assignment_base {
             }
             if ($hassubmission && ($this->assignment->assignmenttype=='upload' || $this->assignment->assignmenttype=='online' || $this->assignment->assignmenttype=='uploadsingle')) { //TODO: this is an ugly hack, where is the plugin spirit? (skodak)
                 echo html_writer::start_tag('div', array('class' => 'mod-assignment-download-link'));
-                echo html_writer::link(new moodle_url('/mod/assignment/submissions.php', array('id' => $this->cm->id, 'download' => 'zip')), get_string('downloadall', 'assignment'));
+//                echo html_writer::link(new moodle_url('/mod/assignment/submissions.php', array('id' => $this->cm->id, 'download' => 'zip')), get_string('downloadall', 'assignment'));
+                echo html_writer::tag('div', get_string('downloadall', 'assignment'), array('id' => 'download_ass'));
+                $download = 'zip';
+                echo html_writer::start_tag('div', array('style'=>'display:none', 'id'=>'download_form'));
+                echo html_writer::start_tag('form', array('method'=>'post'));
+                echo html_writer::tag('input', get_string('with','feedback'), array('class'=>'download_button', 'type'=>'radio', 'name'=>'feedback', 'value'=>'feedback'));
+                echo html_writer::tag('input', get_string('without', 'feedback'), array('class'=>'download_button_2', 'type'=>'radio', 'name'=>'feedback', 'value'=>'no_feedback'));
+                echo html_writer::empty_tag('input', array('class'=>'download_submit', 'type'=>'submit', 'name'=>'submit_1', 'value'=>'into_one_directory'));
+                echo html_writer::empty_tag('input', array('class'=>'download_submit_2', 'type'=>'submit', 'name'=>'submit_2', 'value'=>'each_into_one_directory'));
+                if($download == 'zip')
+                    echo html_writer::empty_tag('input', array('name'=>'download', 'style'=>'display:none', 'value'=>'zip'));
+                else
+                    echo html_writer::empty_tag('input', array('name'=>'download', 'style'=>'display:none', 'value'=>'none'));
+                echo html_writer::end_tag('form');
+                echo html_writer::end_tag('div');
                 echo html_writer::end_tag('div');
             }
             $table->print_html();  /// Print the whole table

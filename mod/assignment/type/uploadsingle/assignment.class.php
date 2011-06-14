@@ -353,10 +353,12 @@ class assignment_uploadsingle extends assignment_base {
     /**
      * creates a zip of all assignment submissions and sends a zip to the browser
      */
-    function download_submissions() {
+    function download_submissions($get_feedback = false, $into_folder = false) {
         global $CFG,$DB;
         require_once($CFG->libdir.'/filelib.php');
 
+        $download_modify = new assignment_base($this->cm->id, $this->assignment, $this->cm, $this->course);
+	
         $submissions = $this->get_submissions('','');
         if (empty($submissions)) {
             print_error('errornosubmissions', 'assignment');
@@ -378,6 +380,15 @@ class assignment_uploadsingle extends assignment_base {
                 $a_assignid = $submission->assignment; //get name of this assignment for use in the file names.
                 $a_user = $DB->get_record("user", array("id"=>$a_userid),'id,username,firstname,lastname'); //get user firstname/lastname
 
+                //judge if we want the feedback
+		if($get_feedback == true){
+		    $return_fileinfo = $download_modify->download_modify($a_user, $a_userid, $into_folder);
+		    $fileinfoname = $return_fileinfo[0];
+		    $file_feedback = $return_fileinfo[1];
+		    if(empty($return_fileinfo[1]) == false)
+		        $filesforzipping[$fileinfoname] = $file_feedback;
+		}
+
                 $files = $fs->get_area_files($this->context->id, 'mod_assignment', 'submission', $submission->id, "timemodified", false);
                 foreach ($files as $file) {
                     //get files new name.
@@ -385,7 +396,12 @@ class assignment_uploadsingle extends assignment_base {
                     $fileoriginal = str_replace($fileext, '', $file->get_filename());
                     $fileforzipname =  clean_filename(fullname($a_user) . "_" . $fileoriginal."_".$a_userid.$fileext);
                     //save file name to array for zipping.
-                    $filesforzipping[$fileforzipname] = $file;
+                    
+                    if($into_folder == true)
+                        $fileforzipname1 = fullname($a_user)."/$fileforzipname";	//put the file into a folder
+                    else
+                        $fileforzipname1 = $fileforzipname;
+                    $filesforzipping[$fileforzipname1] = $file;
                 }
             }
         } // End of foreach
