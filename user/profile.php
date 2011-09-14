@@ -230,6 +230,12 @@ echo '</div>';
 
 echo '<table class="list" summary="">';
 
+if (has_capability('moodle/user:viewalldetails', $context)) {
+    if ($user->id) {
+        print_row(get_string("idnumber").":", "$user->id");
+    }
+}
+
 if (! isset($hiddenfields['country']) && $user->country) {
     print_row(get_string('country') . ':', get_string($user->country, 'countries'));
 }
