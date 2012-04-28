@@ -27,9 +27,9 @@
     <p><strong>哈工大用户使用 HITID 登录，方能享受更多便捷功能</strong></p>
     <p>请选择登录方式：</p>
     <ul>
-        <li><a href="<?php echo $CFG->wwwroot.'/login/index.php?authCAS=CAS';?>">哈工大用户（HITID登录）</a> - HITID登录由网络中心管理，本站无权操作。如遇问题，请询86413483，或webmaster[at]hit.edu.cn</li>
-        <li><a href="<?php echo $CFG->wwwroot.'/login/index.php?authCAS=NOCAS';?>"><?php print_string('accesNOCAS', 'auth_cas');?></a> - 如遇登录问题，请<a href="forgot_password.php">访问此处</a></li>
-        <li><a href="<?php echo $CFG->wwwroot.'/login/index.php';?>" onClick="post_to_url('index.php', {'username' : 'guest', 'password' : 'guest'}); return false">随便看看</a> - 无需注册，访客身份</li>
+        <li><a href="<?php echo get_login_url() . '?authCAS=CAS';?>">哈工大用户（HITID登录）</a> - HITID登录由网络中心管理，本站无权操作。如遇问题，请询86413483，或webmaster[at]hit.edu.cn</li>
+        <li><a href="<?php echo get_login_url() . '?authCAS=NOCAS';?>"><?php print_string('accesNOCAS', 'auth_cas');?></a> - 如遇登录问题，请<a href="forgot_password.php">访问此处</a></li>
+        <li><a href="<?php echo get_login_url();?>" onClick="post_to_url('index.php', {'username' : 'guest', 'password' : 'guest'}); return false">随便看看</a> - 无需注册，访客身份</li>
     </ul>
 </div>
 </div>

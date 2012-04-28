@@ -408,6 +408,14 @@ class assignment_base {
         return $submitted;
     }
 
+    /**
+     * Returns whether the assigment supports lateness information
+     *
+     * @return bool This assignment type supports lateness (true, default) or no (false)
+     */
+    function supports_lateness() {
+        return true;
+    }
 
     /**
      * @todo Document this function
@@ -1375,8 +1383,8 @@ class assignment_base {
                             if ($auser->timemodified > 0) {
                                 $studentmodifiedcontent = $this->print_student_answer($auser->id)
                                         . userdate($auser->timemodified);
-                                if ($assignment->timedue && $auser->timemodified > $assignment->timedue) {
-                                    $studentmodifiedcontent .= assignment_display_lateness($auser->timemodified, $assignment->timedue);
+                                if ($assignment->timedue && $auser->timemodified > $assignment->timedue && $this->supports_lateness()) {
+                                    $studentmodifiedcontent .= $this->display_lateness($auser->timemodified);
                                     $rowclass = 'late';
                                 }
                             } else {
@@ -1860,8 +1868,14 @@ class assignment_base {
      * @return array
      */
     function get_graders($user) {
+        global $DB;
+
         //potential graders
-        $potgraders = get_users_by_capability($this->context, 'mod/assignment:grade', '', '', '', '', '', '', false, false);
+        list($enrolledsql, $params) = get_enrolled_sql($this->context, 'mod/assignment:grade', 0, true);
+        $sql = "SELECT u.*
+                  FROM {user} u
+                  JOIN ($enrolledsql) je ON je.id = u.id";
+        $potgraders = $DB->get_records_sql($sql, $params);
 
         $graders = array();
         if (groups_get_activity_groupmode($this->cm) == SEPARATEGROUPS) {   // Separate groups are being used

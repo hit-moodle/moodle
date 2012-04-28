@@ -116,7 +116,7 @@ html, body {
 }
 
 .course-content .section.main .content {
-    margin: 0 30px 10px 30px;
+    padding: 5px 5px 10px;
     background-color: #FFF;
 }
 
@@ -820,4 +820,3 @@ html, body {
     border-bottom-right-radius: 5px;
     border-bottom-left-radius: 5px;
 }
-
