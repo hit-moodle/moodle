@@ -1535,7 +1535,6 @@ function purify_html($text, $options = array()) {
         $config->set('HTML.Doctype', 'XHTML 1.0 Transitional');
         $config->set('URI.AllowedSchemes', array('http'=>true, 'https'=>true, 'ftp'=>true, 'irc'=>true, 'nntp'=>true, 'news'=>true, 'rtsp'=>true, 'teamspeak'=>true, 'gopher'=>true, 'mms'=>true, 'mailto'=>true));
         $config->set('Attr.AllowedFrameTargets', array('_blank'));
-        $config->set('Attr.EnableID', true);
 
         if (!empty($CFG->allowobjectembed)) {
             $config->set('HTML.SafeObject', true);
