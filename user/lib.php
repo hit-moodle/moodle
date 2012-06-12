@@ -309,7 +309,8 @@ function user_get_user_details($user, $course = null) {
         }
     }
 
-    if ($currentuser
+    if ($isadmin
+      of $currentuser
       or $canviewuseremail  // this is a capability in course context, it will be false in usercontext
       or $user->maildisplay == 1
       or ($user->maildisplay == 2 and enrol_sharing_course($user, $USER))) {

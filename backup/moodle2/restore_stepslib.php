@@ -206,21 +206,25 @@ class restore_gradebook_structure_step extends restore_structure_step {
         global $DB;
 
         $data = (object)$data;
-        $oldid = $data->id;
+        $olduserid = $data->userid;
 
         $data->itemid = $this->get_new_parentid('grade_item');
 
-        $data->userid = $this->get_mappingid('user', $data->userid, NULL);
-        $data->usermodified = $this->get_mappingid('user', $data->usermodified, NULL);
-        $data->locktime     = $this->apply_date_offset($data->locktime);
-        // TODO: Ask, all the rest of locktime/exported... work with time... to be rolled?
-        $data->overridden = $this->apply_date_offset($data->overridden);
-        $data->timecreated  = $this->apply_date_offset($data->timecreated);
-        $data->timemodified = $this->apply_date_offset($data->timemodified);
+        $data->userid = $this->get_mappingid('user', $data->userid, null);
+        if (!empty($data->userid)) {
+            $data->usermodified = $this->get_mappingid('user', $data->usermodified, null);
+            $data->locktime     = $this->apply_date_offset($data->locktime);
+            // TODO: Ask, all the rest of locktime/exported... work with time... to be rolled?
+            $data->overridden = $this->apply_date_offset($data->overridden);
+            $data->timecreated  = $this->apply_date_offset($data->timecreated);
+            $data->timemodified = $this->apply_date_offset($data->timemodified);
 
-        $newitemid = $DB->insert_record('grade_grades', $data);
-        //$this->set_mapping('grade_grade', $oldid, $newitemid);
+            $newitemid = $DB->insert_record('grade_grades', $data);
+        } else {
+            debugging("Mapped user id not found for user id '{$olduserid}', grade item id '{$data->itemid}'");
+        }
     }
+
     protected function process_grade_category($data) {
         global $DB;
 
@@ -2040,18 +2044,24 @@ class restore_activity_grades_structure_step extends restore_structure_step {
 
     protected function process_grade_grade($data) {
         $data = (object)($data);
-
+        $olduserid = $data->userid;
         unset($data->id);
-        $data->itemid = $this->get_new_parentid('grade_item');
-        $data->userid = $this->get_mappingid('user', $data->userid);
-        $data->usermodified = $this->get_mappingid('user', $data->usermodified);
-        $data->rawscaleid = $this->get_mappingid('scale', $data->rawscaleid);
-        // TODO: Ask, all the rest of locktime/exported... work with time... to be rolled?
-        $data->overridden = $this->apply_date_offset($data->overridden);
 
-        $grade = new grade_grade($data, false);
-        $grade->insert('restore');
-        // no need to save any grade_grade mapping
+        $data->itemid = $this->get_new_parentid('grade_item');
+
+        $data->userid = $this->get_mappingid('user', $data->userid, null);
+        if (!empty($data->userid)) {
+            $data->usermodified = $this->get_mappingid('user', $data->usermodified, null);
+            $data->rawscaleid = $this->get_mappingid('scale', $data->rawscaleid);
+            // TODO: Ask, all the rest of locktime/exported... work with time... to be rolled?
+            $data->overridden = $this->apply_date_offset($data->overridden);
+
+            $grade = new grade_grade($data, false);
+            $grade->insert('restore');
+            // no need to save any grade_grade mapping
+        } else {
+            debugging("Mapped user id not found for user id '{$olduserid}', grade item id '{$data->itemid}'");
+        }
     }
 
     /**
