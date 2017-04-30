@@ -26,3 +26,4 @@ If for some reason you can't generate one, you can download a recent one from he
 http://download.moodle.org/tags            (for head)
 http://download.moodle.org/stable19/tags   (Moodle 1.9.x)
 http://download.moodle.org/stable18/tags   (Moodle 1.8.x)
+http://download.moodle.org/stable18/tags   (Moodle 1.8.x)
